@@ -13,7 +13,11 @@ from openpyxl.utils import get_column_letter
 app = FastAPI(title="Trade Report API")
 
 # CORS — configurable via CORS_ORIGINS env var (comma-separated), defaults to allow all
-cors_origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",") if origin.strip()]
+cors_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "https://tradereport.systimus.in").split(",")
+    if origin.strip()
+]
 allow_all_origins = cors_origins == ["*"]
 app.add_middleware(
     CORSMiddleware,
