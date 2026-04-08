@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, File, UploadFile, HTTPException, Response
+from fastapi import FastAPI, File, UploadFile, HTTPException, Response,Request
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import numpy as np
@@ -27,11 +27,6 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["X-Records-Processed", "X-Records-Filtered", "X-File-Stats"],
 )
-
-# 🔥 IMPORTANT (handles preflight)
-@app.options("/{full_path:path}")
-async def options_handler(request: Request):
-    return Response(status_code=204)
 
 
 @app.get("/health")
