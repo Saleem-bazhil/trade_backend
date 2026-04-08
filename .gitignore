@@ -1,0 +1,25 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Local environment files
+.env
+.env.local
+
+# Logs and coverage
+*.log
+.coverage
+htmlcov/
+
+# Local data exports
+*.xlsx
+*.csv
