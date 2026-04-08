@@ -11,8 +11,17 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.trade-api.rule=Host(`trade.systimus.in`)"
-      - "traefik.http.routers.trade-api.entrypoints=websecure"
+      
+      # ✅ Support both HTTP & HTTPS
+      - "traefik.http.routers.trade-api.entrypoints=web,websecure"
+      
+      # ✅ Enable TLS (HTTPS)
       - "traefik.http.routers.trade-api.tls=true"
+      
+      # ✅ Enable Let's Encrypt (IMPORTANT)
+      - "traefik.http.routers.trade-api.tls.certresolver=letsencrypt"
+
+      # ✅ Internal port
       - "traefik.http.services.trade-api.loadbalancer.server.port=8001"
 
     networks:
