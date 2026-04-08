@@ -25,9 +25,9 @@ app.add_middleware(
     allow_credentials=not allow_all_origins,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Records-Processed", "X-Records-Filtered", "X-File-Stats"],
+    # ADD Content-Disposition HERE:
+    expose_headers=["X-Records-Processed", "X-Records-Filtered", "X-File-Stats", "Content-Disposition"],
 )
-
 
 @app.get("/health")
 async def health_check():
