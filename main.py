@@ -28,6 +28,11 @@ app.add_middleware(
     expose_headers=["X-Records-Processed", "X-Records-Filtered", "X-File-Stats"],
 )
 
+# 🔥 IMPORTANT (handles preflight)
+@app.options("/{full_path:path}")
+async def options_handler(request: Request):
+    return Response(status_code=204)
+
 
 @app.get("/health")
 async def health_check():

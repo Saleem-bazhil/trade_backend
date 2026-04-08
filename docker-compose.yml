@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   trade-report-api:
     build:
@@ -10,19 +12,27 @@ services:
 
     labels:
       - "traefik.enable=true"
+
+      # 🌐 Domain
       - "traefik.http.routers.trade-api.rule=Host(`trade.systimus.in`)"
-      
-      # ✅ Support both HTTP & HTTPS
       - "traefik.http.routers.trade-api.entrypoints=web,websecure"
-      
-      # ✅ Enable TLS (HTTPS)
+
+      # 🔒 HTTPS
       - "traefik.http.routers.trade-api.tls=true"
-      
-      # ✅ Enable Let's Encrypt (IMPORTANT)
       - "traefik.http.routers.trade-api.tls.certresolver=letsencrypt"
 
-      # ✅ Internal port
+      # 🚀 Internal port
       - "traefik.http.services.trade-api.loadbalancer.server.port=8001"
+
+      # 🔥 CORS (FULL FIX)
+      - "traefik.http.middlewares.trade-cors.headers.accesscontrolalloworiginlist=https://tradereport.systimus.in"
+      - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS,PUT,DELETE"
+      - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.middlewares.trade-cors.headers.accesscontrolmaxage=100"
+
+      # 🔗 Attach middleware (IMPORTANT)
+      - "traefik.http.routers.trade-api.middlewares=trade-cors@docker"
 
     networks:
       - web
