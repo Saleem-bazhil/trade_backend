@@ -24,19 +24,11 @@ services:
       # 🚀 Internal port
       - "traefik.http.services.trade-api.loadbalancer.server.port=8001"
 
-      # 🔥 CORS (FULL FIX)
-      - "traefik.http.middlewares.trade-cors.headers.accesscontrolalloworiginlist=https://tradereport.systimus.in,https://trade.systimus.in,https://demo.bazhilgroups.in"
-      - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS,PUT,DELETE"
-      - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowheaders=*"
-      - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowcredentials=true"
-      - "traefik.http.middlewares.trade-cors.headers.accesscontrolmaxage=100"
+      # ⏱️ Increase request body size limit (100MB)
+      - "traefik.http.middlewares.trade-body.buffering.maxRequestBodyBytes=104857600"
 
-      # ⏱️ Timeouts
-      - "traefik.http.middlewares.trade-timeout.buffering.maxRequestBodyBytes=104857600"
-      - "traefik.http.services.trade-api.loadbalancer.server.responseHeaderTimeout=300s"
-
-      # 🔗 Attach middleware (IMPORTANT)
-      - "traefik.http.routers.trade-api.middlewares=trade-cors@docker"
+      # 🔗 Attach middleware
+      - "traefik.http.routers.trade-api.middlewares=trade-body@docker"
 
     networks:
       - web
