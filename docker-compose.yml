@@ -31,6 +31,10 @@ services:
       - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowcredentials=true"
       - "traefik.http.middlewares.trade-cors.headers.accesscontrolmaxage=100"
 
+      # ⏱️ Timeouts
+      - "traefik.http.middlewares.trade-timeout.buffering.maxRequestBodyBytes=104857600"
+      - "traefik.http.services.trade-api.loadbalancer.server.responseHeaderTimeout=300s"
+
       # 🔗 Attach middleware (IMPORTANT)
       - "traefik.http.routers.trade-api.middlewares=trade-cors@docker"
 
