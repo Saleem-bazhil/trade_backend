@@ -6,8 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: trade-report-api
-    env_file:
-      - .env
     restart: unless-stopped
 
     labels:
