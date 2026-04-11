@@ -14,7 +14,7 @@ services:
       - "traefik.enable=true"
 
       # 🌐 Domain
-      - "traefik.http.routers.trade-api.rule=Host(`trade.systimus.in`)"
+      - "traefik.http.routers.trade-api.rule=Host(`trade.systimus.in`) || Host(`demo.bazhilgroups.in`)"
       - "traefik.http.routers.trade-api.entrypoints=web,websecure"
 
       # 🔒 HTTPS
@@ -25,7 +25,7 @@ services:
       - "traefik.http.services.trade-api.loadbalancer.server.port=8001"
 
       # 🔥 CORS (FULL FIX)
-      - "traefik.http.middlewares.trade-cors.headers.accesscontrolalloworiginlist=https://tradereport.systimus.in"
+      - "traefik.http.middlewares.trade-cors.headers.accesscontrolalloworiginlist=https://tradereport.systimus.in,https://trade.systimus.in,https://demo.bazhilgroups.in"
       - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS,PUT,DELETE"
       - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowheaders=*"
       - "traefik.http.middlewares.trade-cors.headers.accesscontrolallowcredentials=true"
