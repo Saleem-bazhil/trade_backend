@@ -5,32 +5,4 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: trade-report-api
     restart: unless-stopped
-
-    labels:
-      - "traefik.enable=true"
-
-      # 🌐 Domain
-      - "traefik.http.routers.trade-api.rule=Host(`trade.systimus.in`) || Host(`demo.bazhilgroups.in`)"
-      - "traefik.http.routers.trade-api.entrypoints=web,websecure"
-
-      # 🔒 HTTPS
-      - "traefik.http.routers.trade-api.tls=true"
-      - "traefik.http.routers.trade-api.tls.certresolver=letsencrypt"
-
-      # 🚀 Internal port
-      - "traefik.http.services.trade-api.loadbalancer.server.port=8001"
-
-      # ⏱️ Increase request body size limit (100MB)
-      - "traefik.http.middlewares.trade-body.buffering.maxRequestBodyBytes=104857600"
-
-      # 🔗 Attach middleware
-      - "traefik.http.routers.trade-api.middlewares=trade-body@docker"
-
-    networks:
-      - web
-
-networks:
-  web:
-    external: true
