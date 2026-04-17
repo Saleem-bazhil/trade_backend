@@ -26,7 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
     # ADD Content-Disposition HERE:
-    expose_headers=["X-Records-Processed", "X-Records-Filtered", "X-File-Stats", "Content-Disposition"],
+    expose_headers=["X-Records-Processed", "X-Records-Filtered", "X-File-Stats", "X-City-Stats", "Content-Disposition"],
 )
 
 @app.get("/health")
@@ -73,11 +73,18 @@ def process_single_file(contents: bytes, filename: str) -> dict:
     # Extract the specific 11 fields
     df_final = df_filtered[TARGET_COLUMNS]
 
+    # Calculate city breakdown
+    city_counts = {}
+    if "ASP City" in df_final.columns:
+        counts = df_final["ASP City"].fillna("Unknown").value_counts().to_dict()
+        city_counts = {str(k): int(v) for k, v in counts.items()}
+
     return {
         "df": df_final,
         "total_records": total_records,
         "filtered_records": filtered_records,
-        "filename": filename
+        "filename": filename,
+        "city_counts": city_counts
     }
 
 
@@ -266,6 +273,11 @@ async def process_report(file: UploadFile = File(...)):
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df_final.to_excel(writer, index=False, sheet_name='Trade Report')
+            ws_trade = writer.sheets['Trade Report']
+            max_col = ws_trade.max_column
+            max_row = ws_trade.max_row
+            col_letter = get_column_letter(max_col)
+            ws_trade.auto_filter.ref = f"A1:{col_letter}{max_row}"
             add_pivot_table_sheet(writer, df_final)
 
         output.seek(0)
@@ -273,10 +285,13 @@ async def process_report(file: UploadFile = File(...)):
         date_str = datetime.now().strftime("%d-%m-%Y")
         filename = f"Trade_Report_{date_str}.xlsx"
 
+        city_counts_json = json.dumps(result.get("city_counts", {}))
+
         headers = {
             'Content-Disposition': f'attachment; filename="{filename}"',
             'X-Records-Processed': str(result["total_records"]),
-            'X-Records-Filtered': str(result["filtered_records"])
+            'X-Records-Filtered': str(result["filtered_records"]),
+            'X-City-Stats': city_counts_json
         }
 
         return Response(
@@ -301,6 +316,7 @@ async def process_multiple_reports(files: List[UploadFile] = File(...)):
     file_stats = []
     total_processed = 0
     total_filtered = 0
+    total_city_counts = {}
 
     for file in files:
         if not file.filename.endswith('.xlsx'):
@@ -315,6 +331,10 @@ async def process_multiple_reports(files: List[UploadFile] = File(...)):
             all_dfs.append(result["df"])
             total_processed += result["total_records"]
             total_filtered += result["filtered_records"]
+            
+            for k, v in result.get("city_counts", {}).items():
+                total_city_counts[k] = total_city_counts.get(k, 0) + v
+
             file_stats.append({
                 "filename": result["filename"],
                 "total": result["total_records"],
@@ -332,6 +352,11 @@ async def process_multiple_reports(files: List[UploadFile] = File(...)):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         combined_df.to_excel(writer, index=False, sheet_name='Trade Report')
+        ws_trade = writer.sheets['Trade Report']
+        max_col = ws_trade.max_column
+        max_row = ws_trade.max_row
+        col_letter = get_column_letter(max_col)
+        ws_trade.auto_filter.ref = f"A1:{col_letter}{max_row}"
         add_pivot_table_sheet(writer, combined_df)
 
     output.seek(0)
@@ -339,11 +364,14 @@ async def process_multiple_reports(files: List[UploadFile] = File(...)):
     date_str = datetime.now().strftime("%d-%m-%Y")
     filename = f"Trade_Report_Combined_{date_str}.xlsx"
 
+    city_counts_json = json.dumps(total_city_counts)
+
     headers = {
         'Content-Disposition': f'attachment; filename="{filename}"',
         'X-Records-Processed': str(total_processed),
         'X-Records-Filtered': str(total_filtered),
-        'X-File-Stats': json.dumps(file_stats)
+        'X-File-Stats': json.dumps(file_stats),
+        'X-City-Stats': city_counts_json
     }
 
     return Response(
