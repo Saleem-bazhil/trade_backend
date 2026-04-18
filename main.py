@@ -145,8 +145,9 @@ def add_pivot_table_sheet(writer, df_source):
     wr = f"PivotData!$B$2:$B${n}"   # WIP Aging
     cr = f"PivotData!$D$2:$D${n}"   # ASP City
 
-    # ---- Create Pivot Table worksheet ----
-    ws = writer.book.create_sheet('Pivot Table')
+    # ---- Create Pivot Table worksheet at the front ----
+    ws = writer.book.create_sheet('Pivot Table', 0)
+    writer.book.active = ws
 
     # Styling tokens
     hdr_font = Font(bold=True, size=11)
