@@ -10,6 +10,36 @@ from typing import List
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Database setup
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# Define a simple model for audit/storage
+class TradeRecord(Base):
+    __tablename__ = "trade_records"
+    id = Column(Integer, primary_key=True, index=True)
+    ticket_no = Column(String(50))
+    case_id = Column(String(50))
+    status = Column(String(50))
+    product_name = Column(Text)
+    asp_city = Column(String(100))
+    wip_aging = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# Create tables
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title="Trade Report API")
 
 # CORS — configurable via CORS_ORIGINS env var (comma-separated), defaults to allow all
